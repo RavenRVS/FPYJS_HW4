@@ -38,31 +38,25 @@ function event() {
             console.log(parting);
             process.exit(0);
             break;
-    
         } else if (isNaN(+line.trim()) || (+line.trim() < 0 || +line.trim() > 999)) {
             const notNumber = '\nВы ввели не число от 0 до 999';
             const log = await fs.appendFile(pathFile, notNumber);
             console.log(notNumber);
-            numberOfAttempts++;
-    
         } else if (line.trim() == numberToGuess) {
             const win = `\nВы угадали! Общее количество попыток: ${numberOfAttempts}`;
             const log = await fs.appendFile(pathFile, win);
             console.log(win);
             process.exit(0);
             break;
-    
         } else if (line.trim() <= numberToGuess) {
             const lesserNumber = '\nВаше число меньше моего';
             const log = await fs.appendFile(pathFile, lesserNumber);
             console.log(lesserNumber);
-            numberOfAttempts++;
-            
         } else {
             const greaterNumber = '\nВаше число больше моего';
             const log = await fs.appendFile(pathFile, greaterNumber);
             console.log(greaterNumber);
-            numberOfAttempts++;
         };
+        numberOfAttempts++;
     }
 }) ();
