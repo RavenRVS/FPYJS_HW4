@@ -1,84 +1,74 @@
 const fs = require('node:fs/promises');
 const readline = require('node:readline');
 
-async function writeMyFile(pathFile, data) {
-    try {
-        const promise = fs.writeFile(pathFile, data);
-        await promise;
-    } catch (err) {
-        console.error(err);
-    }
-};
-
-async function appendMyFile(pathFile, data) {
-    try {
-        const promise = fs.appendFile(pathFile, data);
-        await promise;
-    } catch (err) {
-        console.error(err);
-    }
-};
-
 const numberToGuess = Math.floor(Math.random() * 1000);
 
 const greetings = `\nПривет! Я загадал число: ${numberToGuess}`;
 console.log(greetings);
 
 let numberOfAttempts = 1;
-const pathFile = 'Task3/gameLog.txt';
 
-writeMyFile(pathFile, greetings);
+const pathFile = 'Task3/gameLog.txt';
 
 const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout,});
+    output: process.stdout,
+  });
 
-function input(promptText) {
-    return new Promise((resolve, reject) => {
-        rl.setPrompt(promptText)
-        rl.prompt()
-        rl.on('line', (line) => {
-            resolve(line)}).on('close', () => {resolve('close')});
-    })
+function event() {
+    return new Promise ((resolve, reject) => {
+       rl.on('line', (line) => {resolve(line)}).on('close', () => {resolve('exit')});
+    });
 };
 
-async function run(numberOfAttempts) {
-    const promtText = `\nПопытка номер ${numberOfAttempts}. \nВведите число от 0 до 999: `;
-    const line = await input(promtText);
-    const log = await appendMyFile(pathFile, promtText + line.trim());
-    if (line === 'close') {
+async function nextTry (numberOfAttempts) {
+    const promptText = `\nПопытка номер ${numberOfAttempts}. \nВведите число от 0 до 999: `;
+    rl.setPrompt(promptText);
+    await fs.appendFile(pathFile, promptText);
+    rl.prompt();
+    const line = await event();
+    await fs.appendFile(pathFile, line);
+    if (line === 'exit' || line.trim() === 'exit') {
         const parting = '\nИгра прервана. До новых встреч!';
-        const log = await appendMyFile(pathFile, parting);
+        const log = await fs.appendFile(pathFile, parting);
         console.log(parting);
         process.exit(0);
-    };
-    if (isNaN(+line.trim()) || (+line.trim() < 0 || +line.trim() > 999)) {
+
+    } else if (isNaN(+line.trim()) || (+line.trim() < 0 || +line.trim() > 999)) {
         const notNumber = '\nВы ввели не число от 0 до 999';
-        const log = await appendMyFile(pathFile, notNumber);
+        const log = await fs.appendFile(pathFile, notNumber);
         console.log(notNumber);
         numberOfAttempts++;
-        run(numberOfAttempts);
+        nextTry(numberOfAttempts);
 
     } else if (line.trim() == numberToGuess) {
         const win = `\nВы угадали! Общее количество попыток: ${numberOfAttempts}`;
-        const log = await appendMyFile(pathFile, win);
+        const log = await fs.appendFile(pathFile, win);
         console.log(win);
         process.exit(0);
 
     } else if (line.trim() <= numberToGuess) {
         const lesserNumber = '\nВаше число меньше моего';
-        const log = await appendMyFile(pathFile, lesserNumber);
+        const log = await fs.appendFile(pathFile, lesserNumber);
         console.log(lesserNumber);
         numberOfAttempts++;
-        run(numberOfAttempts);
+        nextTry(numberOfAttempts);
         
     } else {
         const greaterNumber = '\nВаше число больше моего';
-        const log = await appendMyFile(pathFile, greaterNumber);
+        const log = await fs.appendFile(pathFile, greaterNumber);
         console.log(greaterNumber);
         numberOfAttempts++;
-        run(numberOfAttempts);
-    }
-};
+        nextTry(numberOfAttempts);
+    };
+}
 
-run(numberOfAttempts);
+(async () => {
+    try {
+        await fs.writeFile(pathFile, greetings);
+    } catch (e) {
+        console.log('Ошибка записи в файл');
+    };
+    
+    nextTry(numberOfAttempts);
+}) ();

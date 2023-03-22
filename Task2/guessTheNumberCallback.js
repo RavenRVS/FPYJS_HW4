@@ -20,9 +20,9 @@ fs.writeFile(pathFile, greetings + firstTry, (err) => {
         prompt: firstTry,
       });
       
-      rl.prompt();
+    rl.prompt();
       
-      rl.on('line', (line) => {
+    rl.on('line', (line) => {
             fs.appendFile(pathFile, line.trim(), (err) => {
                 if (err) throw err;
             
@@ -80,7 +80,6 @@ fs.writeFile(pathFile, greetings + firstTry, (err) => {
                 console.log(parting);
                 process.exit(0);
             });
-            
       });
   });
 
